@@ -1,0 +1,20 @@
+.card .album-image {
+    transition: filter 0.3s ease-in-out;
+  }
+
+  .card:hover .album-image {
+    filter: grayscale(100%);
+  }
+
+  .card .buy-button {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .card:hover .buy-button {
+    opacity: 1;
+  }
+
+#hiddenModalToggler {
+  display: none;
+}
