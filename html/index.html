@@ -19,7 +19,7 @@
                     <a class="nav-link navbar-brand fw-bold" href="#">Favorite Artist</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Order Summary</a>
+                    <a class="nav-link" href="#">Your Orders</a>
                 </li>
             </ul>
             <form class="d-flex" role="search">
@@ -50,30 +50,28 @@
                             <h5>Choose additional items:</h5>
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="signedCopy" name="additional"
-                                    value="50.00">
-                                <label class="form-check-label" for="signedCopy">Signed album copy (+50.00$)</label>
+                                    value="50">
+                                <label class="form-check-label" for="signedCopy">Signed album copy (+50$)</label>
                             </div>
                             <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="shirt" name="additional"
-                                    value="45.00">
-                                <label class="form-check-label" for="shirt">Official T-shirt (+45.00$)</label>
+                                <input type="checkbox" class="form-check-input" id="shirt" name="additional" value="45">
+                                <label class="form-check-label" for="shirt">Official T-shirt (+45$)</label>
                             </div>
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="lyricBook" name="additional"
-                                    value="25.00">
-                                <label class="form-check-label" for="shirt">Lyric book (+25.00$)</label>
+                                    value="25">
+                                <label class="form-check-label" for="lyricBook">Lyric book (+25$)</label>
                             </div>
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="present" name="additional"
-                                    value="15.00">
-                                <label class="form-check-label" for="shirt">Wrap as a present (+15.00$)</label>
+                                    value="15">
+                                <label class="form-check-label" for="present">Wrap as a present (+15$)</label>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
-                        <!-- last name -->
                         <div class="mb-3">
                             <label for="last_name" class="form-label">Last Name</label>
                             <input type="text" class="form-control" id="last_name" name="last_name" required>
@@ -128,11 +126,18 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="summaryModalLabel2">Modal 2</h1>
+                    <h1 class="modal-title fs-5" id="summaryModalLabel2">Order summary</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Hide this modal and show the first with the button below.
+                    <h5 class="text-center mb-3">Thank you for purchasing <span id='summaryAlbumTitle'></span>!</h5>
+                    <p class="fw-semibold">Here are your order details:</p>
+                    <p>Your name: <span id="summaryName"></span> <span id="summaryLastName"></span></p>
+                    <p>Your address: <span id="summaryAddress"></span></p>
+                    <p>Your email: <span id="summaryEmail"></span></p>
+                    <p>Payment option: <span id="summaryPayment"></span></p>
+                    <p>Shipment date: <span id="summaryShipmentDate"></span></p>
+                    <p>Total price: <span id="summaryTotalPrice"></span></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

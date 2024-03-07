@@ -5,7 +5,7 @@ const limit = 20;
 const url = `http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${artist}&api_key=${APIKEY}&format=json&limit=${limit}`;
 
 // Base album price for simplicity
-const BASE_PRICE = 49.0;
+const BASE_PRICE = 49;
 
 // Fetch albums from API
 function fetchAlbums() {
@@ -131,7 +131,22 @@ function handleFormSubmission() {
     // Create an object to hold the form data
     var data = {};
     formData.forEach(function (value, key) {
-      data[key] = value;
+      // If the key is 'additional', we need to handle it separately
+      if (key === "additional") {
+        // If 'additional' is not yet in the data object, add it as an object
+        if (!data[key]) {
+          data[key] = {};
+        }
+        // Get the item name from the checkbox
+        var itemName = form.querySelector(
+          `input[name="${key}"][value="${value}"]`
+        ).id;
+        // Add the value to the 'additional' object with the item name as the key
+        data[key][itemName] = parseFloat(value);
+      } else {
+        // For other keys, just assign the value
+        data[key] = value;
+      }
     });
 
     // get album name and add it to the data object
@@ -149,31 +164,16 @@ function handleFormSubmission() {
 
 // Display the summary
 function displaySummary(data) {
-  // Create the summary string
-  var summary =
-    "Album Name: " +
-    data["albumName"] +
-    "\n" +
-    "Name: " +
-    data["name"] +
-    "\n" +
-    "Last Name: " +
-    data["last_name"] +
-    "\n" +
-    "Address: " +
-    data["address"] +
-    "\n" +
-    "Email: " +
-    data["email"] +
-    "\n" +
-    "Payment Option: " +
-    data["payment"] +
-    "\n" +
-    "Shipment Date: " +
-    data["shipmentDate"];
-
+  console.log(data);
   // Insert the summary into the modal body
-  document.querySelector("#summaryModal .modal-body").innerText = summary;
+  document.querySelector("#summaryAlbumTitle").innerText = data["albumName"];
+  document.querySelector("#summaryName").innerText = data["name"];
+  document.querySelector("#summaryLastName").innerText = data["last_name"];
+  document.querySelector("#summaryEmail").innerText = data["email"];
+  document.querySelector("#summaryAddress").innerText = data["address"];
+  document.querySelector("#summaryPayment").innerText = data["payment"];
+  document.querySelector("#summaryShipmentDate").innerText =
+    data["shipmentDate"];
 }
 
 // Initialize all functionality when the document is ready
