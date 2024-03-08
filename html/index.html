@@ -46,27 +46,8 @@
                 </div>
                 <div class="modal-body">
                     <form id="purchaseForm">
-                        <div class="mb-3">
+                        <div class="mb-3" id="additionalItems">
                             <h5>Choose additional items:</h5>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="signedCopy" name="additional"
-                                    value="50">
-                                <label class="form-check-label" for="signedCopy">Signed album copy (+50$)</label>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="shirt" name="additional" value="45">
-                                <label class="form-check-label" for="shirt">Official T-shirt (+45$)</label>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="lyricBook" name="additional"
-                                    value="25">
-                                <label class="form-check-label" for="lyricBook">Lyric book (+25$)</label>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="present" name="additional"
-                                    value="15">
-                                <label class="form-check-label" for="present">Wrap as a present (+15$)</label>
-                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
@@ -132,12 +113,13 @@
                 <div class="modal-body">
                     <h5 class="text-center mb-3">Thank you for purchasing <span id='summaryAlbumTitle'></span>!</h5>
                     <p class="fw-semibold">Here are your order details:</p>
-                    <p>Your name: <span id="summaryName"></span> <span id="summaryLastName"></span></p>
-                    <p>Your address: <span id="summaryAddress"></span></p>
-                    <p>Your email: <span id="summaryEmail"></span></p>
+                    <p>Additional items: <span id="summaryAdditionalItems"></span></p>
+                    <p>Full name: <span id="summaryName"></span> <span id="summaryLastName"></span></p>
+                    <p>Address: <span id="summaryAddress"></span></p>
+                    <p>Email: <span id="summaryEmail"></span></p>
                     <p>Payment option: <span id="summaryPayment"></span></p>
                     <p>Shipment date: <span id="summaryShipmentDate"></span></p>
-                    <p>Total price: <span id="summaryTotalPrice"></span></p>
+                    <p>Total price: <span id="summaryTotalPrice"></span>$</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

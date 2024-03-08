@@ -4,8 +4,31 @@ const artist = "Led%20Zeppelin";
 const limit = 20;
 const url = `http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${artist}&api_key=${APIKEY}&format=json&limit=${limit}`;
 
-// Base album price for simplicity
-const BASE_PRICE = 49;
+const BASE_PRICE = 49; // Base album price for simplicity
+let totalPrice; // Total price of the purchase
+
+const additionalItems = [
+  {
+    id: "signedCopy",
+    price: 50,
+    description: "Signed album copy",
+  },
+  {
+    id: "tshirt",
+    price: 45,
+    description: "Official T-shirt",
+  },
+  {
+    id: "lyricBook",
+    price: 25,
+    description: "Lyric book",
+  },
+  {
+    id: "present",
+    price: 15,
+    description: "Wrap as present",
+  },
+];
 
 // Fetch albums from API
 function fetchAlbums() {
@@ -88,12 +111,11 @@ function updateTotalPrice() {
   var totalPriceElement = document.getElementById("totalPrice");
 
   // Get all the checkboxes
-  var checkboxes = document.querySelectorAll("input[type=checkbox]");
+  const checkboxes = document.querySelectorAll("input[type=checkbox]");
 
   // Function to update the total price
   function calculateTotalPrice() {
-    var totalPrice = BASE_PRICE;
-
+    totalPrice = BASE_PRICE; //reset the total price
     // Add the price of each checked checkbox to the total price
     checkboxes.forEach(function (checkbox) {
       if (checkbox.checked) {
@@ -131,23 +153,24 @@ function handleFormSubmission() {
     // Create an object to hold the form data
     var data = {};
     formData.forEach(function (value, key) {
-      // If the key is 'additional', we need to handle it separately
+      // Handle additional items separately
       if (key === "additional") {
-        // If 'additional' is not yet in the data object, add it as an object
+        // If 'additional' is not yet in the data object, add it as an array
         if (!data[key]) {
-          data[key] = {};
+          data[key] = [];
         }
         // Get the item name from the checkbox
         var itemName = form.querySelector(
           `input[name="${key}"][value="${value}"]`
         ).id;
-        // Add the value to the 'additional' object with the item name as the key
-        data[key][itemName] = parseFloat(value);
+        // Add the value to the 'additional' array
+        data[key].push(itemName);
       } else {
         // For other keys, just assign the value
         data[key] = value;
       }
     });
+    data["totalPrice"] = totalPrice; //add total price
 
     // get album name and add it to the data object
     let albumName = document.getElementById("albumName").textContent;
@@ -166,6 +189,8 @@ function handleFormSubmission() {
 function displaySummary(data) {
   console.log(data);
   // Insert the summary into the modal body
+  document.querySelector("#summaryAdditionalItems").innerText =
+    summaryAdditionalItems(data["additional"]);
   document.querySelector("#summaryAlbumTitle").innerText = data["albumName"];
   document.querySelector("#summaryName").innerText = data["name"];
   document.querySelector("#summaryLastName").innerText = data["last_name"];
@@ -174,11 +199,56 @@ function displaySummary(data) {
   document.querySelector("#summaryPayment").innerText = data["payment"];
   document.querySelector("#summaryShipmentDate").innerText =
     data["shipmentDate"];
+  document.querySelector("#summaryTotalPrice").innerText = data["totalPrice"];
+}
+
+// Set up additional items
+function setAdditionalItems(items) {
+  // Get the additional items div
+  var additionalItemsDiv = document.getElementById("additionalItems");
+
+  // Loop through the items
+  items.forEach(function (item) {
+    // Create a div for the item
+    var itemDiv = document.createElement("div");
+    itemDiv.className = "form-check mb-3";
+    itemDiv.innerHTML = `
+      <input class="form-check-input" type="checkbox" value="${item.price}" id="${item.id}" name="additional">
+      <label class="form-check-label" for="${item.id}">${item.description} (+${item.price}$)</label>
+      `;
+
+    // Add the item div to the additional items div
+    additionalItemsDiv.appendChild(itemDiv);
+  });
+}
+
+function summaryAdditionalItems(items) {
+  let summary = "";
+  if (items === undefined) {
+    summary = "None";
+  } else {
+    // Get the keys from the items object
+    const keys = Object.keys(items);
+
+    // For each id in the items array, find the corresponding item in the additionalItems array
+    items.forEach((id) => {
+      const item = additionalItems.find((item) => item.id === id);
+      if (item) {
+        // If the item was found, add its description to the summary
+        summary += item.description + ", ";
+      }
+    });
+
+    // Remove the trailing comma and space
+    summary = summary.slice(0, -2);
+  }
+  return summary;
 }
 
 // Initialize all functionality when the document is ready
 document.addEventListener("DOMContentLoaded", function () {
   fetchAlbums();
+  setAdditionalItems(additionalItems);
   setShipmentDateAttributes();
   updateTotalPrice();
   handleFormSubmission();
