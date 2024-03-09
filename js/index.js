@@ -188,18 +188,13 @@ function handleFormSubmission() {
 // Display the summary
 function displaySummary(data) {
   console.log(data);
-  // Insert the summary into the modal body
-  document.querySelector("#summaryAdditionalItems").innerText =
-    summaryAdditionalItems(data["additional"]);
-  document.querySelector("#summaryAlbumTitle").innerText = data["albumName"];
-  document.querySelector("#summaryName").innerText = data["name"];
-  document.querySelector("#summaryLastName").innerText = data["lastName"];
-  document.querySelector("#summaryEmail").innerText = data["email"];
-  document.querySelector("#summaryAddress").innerText = data["address"];
-  document.querySelector("#summaryPayment").innerText = data["payment"];
-  document.querySelector("#summaryShipmentDate").innerText =
-    data["shipmentDate"];
-  document.querySelector("#summaryTotalPrice").innerText = data["totalPrice"];
+  for (let key in data) {
+    let summary = document.getElementById(`${key}Summary`);
+    summary.innerText = data[key];
+    if (key === "additional") {
+      summary.innerText = summaryAdditionalItems(data["additional"]);
+    }
+  }
 }
 
 // Set up additional items
