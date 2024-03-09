@@ -88,17 +88,17 @@ function displayAlbums(data) {
 // Set max/min attributes for shipment date
 function setShipmentDateAttributes() {
   // Select the input element
-  var shipmentDateInput = document.getElementById("shipmentDate");
+  const shipmentDateInput = document.getElementById("shipmentDate");
 
   // Calculate tomorrow's date and 14 days from now
-  var tomorrow = new Date();
+  const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  var twoWeeksFromNow = new Date();
+  const twoWeeksFromNow = new Date();
   twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 60);
 
   // Format the dates in the 'YYYY-MM-DD' format
-  var minDate = tomorrow.toISOString().split("T")[0];
-  var maxDate = twoWeeksFromNow.toISOString().split("T")[0];
+  const minDate = tomorrow.toISOString().split("T")[0];
+  const maxDate = twoWeeksFromNow.toISOString().split("T")[0];
 
   // Set the shipment date attrs
   shipmentDateInput.setAttribute("min", minDate);
@@ -108,7 +108,7 @@ function setShipmentDateAttributes() {
 // Update price when buying a particular album
 function updateTotalPrice() {
   // Get the total price element
-  var totalPriceElement = document.getElementById("totalPrice");
+  const totalPriceElement = document.getElementById("totalPrice");
 
   // Get all the checkboxes
   const checkboxes = document.querySelectorAll("input[type=checkbox]");
@@ -140,7 +140,7 @@ function updateTotalPrice() {
 // Handle form submission
 function handleFormSubmission() {
   // Get the form
-  var form = document.getElementById("purchaseForm");
+  const form = document.getElementById("purchaseForm");
 
   // Add an event listener for the form
   form.addEventListener("submit", function (event) {
@@ -148,10 +148,10 @@ function handleFormSubmission() {
     event.preventDefault();
 
     // Get the form data
-    var formData = new FormData(form);
+    const formData = new FormData(form);
 
     // Create an object to hold the form data
-    var data = {};
+    const data = {};
     formData.forEach(function (value, key) {
       // Handle additional items separately
       if (key === "additional") {
@@ -160,7 +160,7 @@ function handleFormSubmission() {
           data[key] = [];
         }
         // Get the item name from the checkbox
-        var itemName = form.querySelector(
+        let itemName = form.querySelector(
           `input[name="${key}"][value="${value}"]`
         ).id;
         // Add the value to the 'additional' array
@@ -193,7 +193,7 @@ function displaySummary(data) {
     summaryAdditionalItems(data["additional"]);
   document.querySelector("#summaryAlbumTitle").innerText = data["albumName"];
   document.querySelector("#summaryName").innerText = data["name"];
-  document.querySelector("#summaryLastName").innerText = data["last_name"];
+  document.querySelector("#summaryLastName").innerText = data["lastName"];
   document.querySelector("#summaryEmail").innerText = data["email"];
   document.querySelector("#summaryAddress").innerText = data["address"];
   document.querySelector("#summaryPayment").innerText = data["payment"];
@@ -205,12 +205,12 @@ function displaySummary(data) {
 // Set up additional items
 function setAdditionalItems(items) {
   // Get the additional items div
-  var additionalItemsDiv = document.getElementById("additionalItems");
+  const additionalItemsDiv = document.getElementById("additionalItems");
 
   // Loop through the items
   items.forEach(function (item) {
     // Create a div for the item
-    var itemDiv = document.createElement("div");
+    const itemDiv = document.createElement("div");
     itemDiv.className = "form-check mb-3";
     itemDiv.innerHTML = `
       <input class="form-check-input" type="checkbox" value="${item.price}" id="${item.id}" name="additional">
@@ -227,9 +227,6 @@ function summaryAdditionalItems(items) {
   if (items === undefined) {
     summary = "None";
   } else {
-    // Get the keys from the items object
-    const keys = Object.keys(items);
-
     // For each id in the items array, find the corresponding item in the additionalItems array
     items.forEach((id) => {
       const item = additionalItems.find((item) => item.id === id);
