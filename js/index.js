@@ -1,11 +1,32 @@
 // API request setup
 const APIKEY = "89f20445788ab5ad5af51b3231833937"; // my Last.fm API key
-const artist = "Led%20Zeppelin";
-const limit = 20;
+const artist = "Led%20Zeppelin"; //for simplicity
+const limit = 30;
 const url = `http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${artist}&api_key=${APIKEY}&format=json&limit=${limit}`;
 
 const BASE_PRICE = 49; // Base album price for simplicity
 let totalPrice; // Total price of the purchase
+
+// saving to localStorage
+function saveToLocalStorage(albumName, data) {
+  localStorage.setItem(albumName, JSON.stringify(data));
+}
+
+// loading from localStorage
+function loadFromLocalStorage(albumName) {
+  const data = localStorage.getItem(albumName);
+  return data ? JSON.parse(data) : null;
+}
+
+//search functionality
+searchForm = document.getElementById("searchForm");
+searchForm.addEventListener("input", function (e) {
+  const query = e.target.value.toLowerCase();
+  const filteredAlbums = albums.filter((album) =>
+    album.name.toLowerCase().includes(query)
+  );
+  displayAlbums(filteredAlbums);
+});
 
 const additionalItems = [
   {
@@ -40,8 +61,8 @@ function fetchAlbums() {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
-      displayAlbums(data);
+      albums = data.topalbums.album;
+      displayAlbums(albums);
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -49,18 +70,18 @@ function fetchAlbums() {
 }
 
 // Display albums on the page
-function displayAlbums(data) {
-  const albums = data.topalbums.album;
+function displayAlbums(albums) {
+  console.log("displaying albums...");
   const displayAlbums = document.getElementById("display-albums");
-  displayAlbums.innerHTML = ""; // clear the div
-
+  displayAlbums.innerHTML = ""; // clear the div from previous searches etc
   albums.forEach((album) => {
+    //display albums in a responsive grid
     const albumDiv = document.createElement("div");
     albumDiv.className =
-      "col-12 col-md-6 col-lg-4 col-xl-3 d-flex justify-content-center"; // Bootstrap grid classes
+      "col-12 col-md-6 col-lg-4 col-xl-3 d-flex justify-content-center";
 
     albumDiv.innerHTML = `
-      <div class="card m-2" style="width: 18rem;">
+      <div class="card m-2" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#purchaseModal" type="button" data-album="${album.name}">
         <img src="${album.image[2]["#text"]}" class="card-img-top album-image" alt="${album.name}">
         <div class="card-body">
           <h5 class="card-title">${album.name}</h5>
@@ -70,17 +91,46 @@ function displayAlbums(data) {
       </div>
       </div>
     `;
-    displayAlbums.appendChild(albumDiv); // append the albumDiv to displayAlbums
+    displayAlbums.appendChild(albumDiv); // append albumDiv to the grid
   });
 
-  // Add event listener to "Buy" buttons
-  document.querySelectorAll(".buy-button").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      const albumName = event.target.dataset.album;
-      console.log(albumName);
+  document.querySelectorAll(".card").forEach((card) => {
+    card.addEventListener("click", (e) => {
+      document.getElementById("purchaseForm").reset();
+      const albumName = e.currentTarget.dataset.album;
       document.getElementById("albumName").textContent = `${albumName}`;
-      // Update the rest of the modal content here
-      // new bootstrap.Modal(document.getElementById('purchaseModal')).show();
+
+      const data = loadFromLocalStorage(albumName);
+      console.log(data);
+      if (data) {
+        Object.entries(data).forEach(([key, value]) => {
+          // skip for bought key
+          if (key === "bought") {
+            return;
+          }
+          let htmlInput;
+          if (key === "payment") {
+            htmlInput = document.querySelector(`input[value="${value}"]`);
+            htmlInput.checked = true;
+          } else {
+            htmlInput = document.getElementById(`${key}`);
+            htmlInput.value = value;
+          }
+          // If the key is 'additionalItems', handle it separately
+          if (key === "additionalItems") {
+            // Loop through the array and check the checkboxes
+            value.forEach((item) => {
+              let checkbox = document.getElementById(item);
+              if (checkbox) {
+                checkbox.checked = true;
+              }
+            });
+          }
+          // console.log(key);
+          // console.log(htmlInput);
+        });
+      }
+      updateTotalPrice();
     });
   });
 }
@@ -124,8 +174,17 @@ function updateTotalPrice() {
     });
 
     // Update the total price element
-    totalPriceElement.textContent =
-      "Total price: " + totalPrice.toFixed(2) + "$";
+    totalPriceElement.textContent = totalPrice.toFixed(2) + "$";
+
+    // Get album name from the form
+    let albumName = document.getElementById("albumName").textContent;
+    // Load album data from localStorage
+    let albumData = loadFromLocalStorage(albumName);
+    // If album data exists, update the total price and save it back to localStorage
+    if (albumData) {
+      albumData.totalPrice = totalPrice;
+      saveToLocalStorage(albumName, albumData);
+    }
   }
 
   // Update the total price initially
@@ -154,8 +213,8 @@ function handleFormSubmission() {
     const data = {};
     formData.forEach(function (value, key) {
       // Handle additional items separately
-      if (key === "additional") {
-        // If 'additional' is not yet in the data object, add it as an array
+      if (key === "additionalItems") {
+        // If 'additionalItems' is not yet in the data object, add it as an array
         if (!data[key]) {
           data[key] = [];
         }
@@ -163,7 +222,7 @@ function handleFormSubmission() {
         let itemName = form.querySelector(
           `input[name="${key}"][value="${value}"]`
         ).id;
-        // Add the value to the 'additional' array
+        // Add the value to the 'additionalItems' array
         data[key].push(itemName);
       } else {
         // For other keys, just assign the value
@@ -176,12 +235,15 @@ function handleFormSubmission() {
     let albumName = document.getElementById("albumName").textContent;
     data["albumName"] = albumName;
 
+    data["bought"] = true;
+
     displaySummary(data);
 
     const hiddenModalToggler = document.getElementById("hiddenModalToggler");
     hiddenModalToggler.click();
     // Log the form data
     console.log(data);
+    saveToLocalStorage(albumName, data);
   });
 }
 
@@ -190,9 +252,12 @@ function displaySummary(data) {
   console.log(data);
   for (let key in data) {
     let summary = document.getElementById(`${key}Summary`);
+    if (key === "bought") {
+      continue;
+    }
     summary.innerText = data[key];
-    if (key === "additional") {
-      summary.innerText = summaryAdditionalItems(data["additional"]);
+    if (key === "additionalItems") {
+      summary.innerText = summaryAdditionalItems(data["additionalItems"]);
     }
   }
 }
@@ -208,7 +273,7 @@ function setAdditionalItems(items) {
     const itemDiv = document.createElement("div");
     itemDiv.className = "form-check mb-3";
     itemDiv.innerHTML = `
-      <input class="form-check-input" type="checkbox" value="${item.price}" id="${item.id}" name="additional">
+      <input class="form-check-input" type="checkbox" value="${item.price}" id="${item.id}" name="additionalItems">
       <label class="form-check-label" for="${item.id}">${item.description} (+${item.price}$)</label>
       `;
 
@@ -245,3 +310,24 @@ document.addEventListener("DOMContentLoaded", function () {
   updateTotalPrice();
   handleFormSubmission();
 });
+
+function albumsValidation(albums) {
+  //starting from the end of the array so that deleting the el won't make the loop skip any els
+  for (let i = albums.length - 1; i >= 0; i--) {
+    //some entries come empty from the API, we don't want those displayed
+    if (albums[i].name === "(null)") {
+      albums.splice(i, 1);
+    }
+    //albums with no image
+  }
+  return albums;
+}
+
+// // Add event listener to "Buy" buttons, instead of cards that are now
+// document.querySelectorAll(".buy-button").forEach((button) => {
+//   button.addEventListener("click", (event) => {
+//     const albumName = event.target.dataset.album;
+//     console.log(albumName);
+//     document.getElementById("albumName").textContent = `${albumName}`;
+//   });
+// });
