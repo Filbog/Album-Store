@@ -100,7 +100,7 @@ function displayAlbums(albums) {
       const albumName = e.currentTarget.dataset.album;
       document.getElementById("albumName").textContent = `${albumName}`;
 
-      const data = loadFromLocalStorage(albumName);
+      let data = loadFromLocalStorage(albumName);
       console.log(data);
       if (data) {
         Object.entries(data).forEach(([key, value]) => {
@@ -126,9 +126,22 @@ function displayAlbums(albums) {
               }
             });
           }
-          // console.log(key);
-          // console.log(htmlInput);
         });
+      } else {
+        data = {
+          additionalItems: [],
+          address: "",
+          albumName: albumName,
+          bought: false,
+          email: "",
+          lastName: "",
+          name: "",
+          payment: "",
+          shipmentDate: "",
+          totalPrice: 49,
+        };
+        // Save the default data to localStorage
+        saveToLocalStorage(albumName, data);
       }
       updateTotalPrice();
     });
