@@ -69,6 +69,52 @@ function fetchAlbums() {
     });
 }
 
+// Function to handle form changes
+function handleFormChange() {
+  // Get the form
+  const form = document.getElementById("purchaseForm");
+
+  // Get the form data
+  const formData = new FormData(form);
+
+  // Create an object to hold the form data
+  const data = {};
+  formData.forEach(function (value, key) {
+    // Handle additional items separately
+    if (key === "additionalItems") {
+      // If 'additionalItems' is not yet in the data object, add it as an array
+      if (!data[key]) {
+        data[key] = [];
+      }
+      // Get the item name from the checkbox
+      let itemName = form.querySelector(
+        `input[name="${key}"][value="${value}"]`
+      ).id;
+      // Add the value to the 'additionalItems' array
+      data[key].push(itemName);
+    } else {
+      // For other keys, just assign the value
+      data[key] = value;
+    }
+  });
+  data["totalPrice"] = totalPrice; //add total price
+
+  // get album name and add it to the data object
+  let albumName = document.getElementById("albumName").textContent;
+  data["albumName"] = albumName;
+
+  // Save the form data to localStorage
+  saveToLocalStorage(albumName, data);
+}
+
+// Get the form
+const form = document.getElementById("purchaseForm");
+
+// Add an event listener for form changes to each input field
+Array.from(form.elements).forEach(function (element) {
+  element.addEventListener("input", handleFormChange);
+});
+
 // Display albums on the page
 function displayAlbums(albums) {
   console.log("displaying albums...");
@@ -94,9 +140,12 @@ function displayAlbums(albums) {
     displayAlbums.appendChild(albumDiv); // append albumDiv to the grid
   });
 
+  // Event listener for album card click
   document.querySelectorAll(".card").forEach((card) => {
     card.addEventListener("click", (e) => {
-      document.getElementById("purchaseForm").reset();
+      // Get the form
+      const form = document.getElementById("purchaseForm");
+      form.reset();
       const albumName = e.currentTarget.dataset.album;
       document.getElementById("albumName").textContent = `${albumName}`;
 
@@ -144,6 +193,14 @@ function displayAlbums(albums) {
         saveToLocalStorage(albumName, data);
       }
       updateTotalPrice();
+
+      // Handle form changes
+      handleFormChange();
+
+      // Add an event listener for form changes to each input field
+      Array.from(form.elements).forEach(function (element) {
+        element.addEventListener("input", handleFormChange);
+      });
     });
   });
 }
@@ -214,49 +271,28 @@ function handleFormSubmission() {
   // Get the form
   const form = document.getElementById("purchaseForm");
 
-  // Add an event listener for the form
+  // Add an event listener for the form submission
   form.addEventListener("submit", function (event) {
     // Prevent the default form submission
     event.preventDefault();
 
-    // Get the form data
-    const formData = new FormData(form);
+    // Handle the form submission
+    handleFormChange();
 
-    // Create an object to hold the form data
-    const data = {};
-    formData.forEach(function (value, key) {
-      // Handle additional items separately
-      if (key === "additionalItems") {
-        // If 'additionalItems' is not yet in the data object, add it as an array
-        if (!data[key]) {
-          data[key] = [];
-        }
-        // Get the item name from the checkbox
-        let itemName = form.querySelector(
-          `input[name="${key}"][value="${value}"]`
-        ).id;
-        // Add the value to the 'additionalItems' array
-        data[key].push(itemName);
-      } else {
-        // For other keys, just assign the value
-        data[key] = value;
-      }
-    });
-    data["totalPrice"] = totalPrice; //add total price
-
-    // get album name and add it to the data object
+    // Get album name
     let albumName = document.getElementById("albumName").textContent;
-    data["albumName"] = albumName;
+
+    // Load data from localStorage
+    let data = loadFromLocalStorage(albumName);
 
     data["bought"] = true;
-
+    saveToLocalStorage(albumName, data);
     displaySummary(data);
 
     const hiddenModalToggler = document.getElementById("hiddenModalToggler");
     hiddenModalToggler.click();
     // Log the form data
     console.log(data);
-    saveToLocalStorage(albumName, data);
   });
 }
 
