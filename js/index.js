@@ -372,11 +372,4 @@ function albumsValidation(albums) {
   return albums;
 }
 
-// // Add event listener to "Buy" buttons, instead of cards that are now
-// document.querySelectorAll(".buy-button").forEach((button) => {
-//   button.addEventListener("click", (event) => {
-//     const albumName = event.target.dataset.album;
-//     console.log(albumName);
-//     document.getElementById("albumName").textContent = `${albumName}`;
-//   });
-// });
+const purchases = document.getElementById("purchases");
