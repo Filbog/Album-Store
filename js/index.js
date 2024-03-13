@@ -1,73 +1,12 @@
-// API request setup
-const APIKEY = "89f20445788ab5ad5af51b3231833937"; // my Last.fm API key
-const artist = "Led%20Zeppelin"; //for simplicity
-const limit = 30;
-const url = `http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${artist}&api_key=${APIKEY}&format=json&limit=${limit}`;
+import { search, setShipmentDateAttributes } from "./utils.js";
+import { fetchAlbums } from "./api.js";
+import { saveToLocalStorage, loadFromLocalStorage } from "./localStorage.js";
+import { additionalItems, setAdditionalItems } from "./additionalItems.js";
 
 const BASE_PRICE = 49; // Base album price for simplicity
 let totalPrice; // Total price of the purchase
 
-// saving to localStorage
-function saveToLocalStorage(albumName, data) {
-  localStorage.setItem(albumName, JSON.stringify(data));
-}
-
-// loading from localStorage
-function loadFromLocalStorage(albumName) {
-  const data = localStorage.getItem(albumName);
-  return data ? JSON.parse(data) : null;
-}
-
-//search functionality
-searchForm = document.getElementById("searchForm");
-searchForm.addEventListener("input", function (e) {
-  const query = e.target.value.toLowerCase();
-  const filteredAlbums = albums.filter((album) =>
-    album.name.toLowerCase().includes(query)
-  );
-  displayAlbums(filteredAlbums);
-});
-
-const additionalItems = [
-  {
-    id: "signedCopy",
-    price: 50,
-    description: "Signed album copy",
-  },
-  {
-    id: "tshirt",
-    price: 45,
-    description: "Official T-shirt",
-  },
-  {
-    id: "lyricBook",
-    price: 25,
-    description: "Lyric book",
-  },
-  {
-    id: "present",
-    price: 15,
-    description: "Wrap as present",
-  },
-];
-
-// Fetch albums from API
-function fetchAlbums() {
-  fetch(url)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      albums = data.topalbums.album;
-      displayAlbums(albums);
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-}
+// let albums;
 
 // Function to handle form changes
 function handleFormChange() {
@@ -107,16 +46,8 @@ function handleFormChange() {
   saveToLocalStorage(albumName, data);
 }
 
-// Get the form
-const form = document.getElementById("purchaseForm");
-
-// Add an event listener for form changes to each input field
-Array.from(form.elements).forEach(function (element) {
-  element.addEventListener("input", handleFormChange);
-});
-
 // Display albums on the page
-function displayAlbums(albums) {
+export function displayAlbums(albums) {
   console.log("displaying albums...");
   const displayAlbums = document.getElementById("display-albums");
   displayAlbums.innerHTML = ""; // clear the div from previous searches etc
@@ -140,7 +71,7 @@ function displayAlbums(albums) {
     displayAlbums.appendChild(albumDiv); // append albumDiv to the grid
   });
 
-  // Event listener for album card click
+  // Event listener for album card click - opening the purchase modal
   document.querySelectorAll(".card").forEach((card) => {
     card.addEventListener("click", (e) => {
       // Get the form
@@ -159,8 +90,10 @@ function displayAlbums(albums) {
           }
           let htmlInput;
           if (key === "payment") {
-            htmlInput = document.querySelector(`input[value="${value}"]`);
-            htmlInput.checked = true;
+            if (value !== "") {
+              htmlInput = document.querySelector(`input[value="${value}"]`);
+              htmlInput.checked = true;
+            }
           } else {
             htmlInput = document.getElementById(`${key}`);
             htmlInput.value = value;
@@ -187,42 +120,18 @@ function displayAlbums(albums) {
           name: "",
           payment: "",
           shipmentDate: "",
-          totalPrice: 49,
+          totalPrice: BASE_PRICE,
         };
         // Save the default data to localStorage
         saveToLocalStorage(albumName, data);
       }
       updateTotalPrice();
-
-      // Handle form changes
-      handleFormChange();
-
       // Add an event listener for form changes to each input field
       Array.from(form.elements).forEach(function (element) {
         element.addEventListener("input", handleFormChange);
       });
     });
   });
-}
-
-// Set max/min attributes for shipment date
-function setShipmentDateAttributes() {
-  // Select the input element
-  const shipmentDateInput = document.getElementById("shipmentDate");
-
-  // Calculate tomorrow's date and 14 days from now
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const twoWeeksFromNow = new Date();
-  twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 60);
-
-  // Format the dates in the 'YYYY-MM-DD' format
-  const minDate = tomorrow.toISOString().split("T")[0];
-  const maxDate = twoWeeksFromNow.toISOString().split("T")[0];
-
-  // Set the shipment date attrs
-  shipmentDateInput.setAttribute("min", minDate);
-  shipmentDateInput.setAttribute("max", maxDate);
 }
 
 // Update price when buying a particular album
@@ -311,26 +220,6 @@ function displaySummary(data) {
   }
 }
 
-// Set up additional items
-function setAdditionalItems(items) {
-  // Get the additional items div
-  const additionalItemsDiv = document.getElementById("additionalItems");
-
-  // Loop through the items
-  items.forEach(function (item) {
-    // Create a div for the item
-    const itemDiv = document.createElement("div");
-    itemDiv.className = "form-check mb-3";
-    itemDiv.innerHTML = `
-      <input class="form-check-input" type="checkbox" value="${item.price}" id="${item.id}" name="additionalItems">
-      <label class="form-check-label" for="${item.id}">${item.description} (+${item.price}$)</label>
-      `;
-
-    // Add the item div to the additional items div
-    additionalItemsDiv.appendChild(itemDiv);
-  });
-}
-
 function summaryAdditionalItems(items) {
   let summary = "";
   if (items === undefined) {
@@ -353,23 +242,15 @@ function summaryAdditionalItems(items) {
 
 // Initialize all functionality when the document is ready
 document.addEventListener("DOMContentLoaded", function () {
-  fetchAlbums();
-  setAdditionalItems(additionalItems);
-  setShipmentDateAttributes();
-  updateTotalPrice();
-  handleFormSubmission();
+  fetchAlbums().then((albums) => {
+    displayAlbums(albums);
+    setAdditionalItems(additionalItems);
+    const searchForm = document.getElementById("searchForm");
+    searchForm.addEventListener("input", search(albums));
+    setShipmentDateAttributes();
+    updateTotalPrice();
+    handleFormSubmission();
+  });
 });
-
-function albumsValidation(albums) {
-  //starting from the end of the array so that deleting the el won't make the loop skip any els
-  for (let i = albums.length - 1; i >= 0; i--) {
-    //some entries come empty from the API, we don't want those displayed
-    if (albums[i].name === "(null)") {
-      albums.splice(i, 1);
-    }
-    //albums with no image
-  }
-  return albums;
-}
 
 const purchases = document.getElementById("purchases");
