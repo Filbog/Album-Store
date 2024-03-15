@@ -24,7 +24,7 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#ordersModal"
-                            id="orders">Your
+                            id="ordersBtn">Your
                             Orders</a>
                     </li>
                 </ul>
@@ -95,9 +95,10 @@
                             <div>
                                 <p class="">Total price: <span id='totalPrice'></span></p>
                             </div>
-                            <div id="footerButtons">
+                            <div id="footerButtons" class="">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Purchase</button>
+                                <button type="submit" class="btn btn-primary" id="purchaseBtn">Purchase</button>
+                                <div id="cancelOrderBtnPlaceholder"></div>
                                 <button class="btn" id="hiddenModalToggler" data-bs-target="#summaryModal"
                                     data-bs-toggle="modal"></button>
                             </div>
@@ -148,12 +149,13 @@
                         <div id="purchases"></div>
                 </div>
                 <div class="modal-footer">
+
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
-
+    <div id="alertPlaceholder"></div>
     <!-- Button that takes user to the top when they scrolled down, not working rn -->
     <!-- <button type="button" class="btn" id="toTheTopBtn"><i class="fa-regular fa-circle-up"></i></button> -->
 
