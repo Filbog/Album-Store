@@ -1,10 +1,9 @@
 // API request setup
-const APIKEY = "89f20445788ab5ad5af51b3231833937"; // my Last.fm API key
+const APIKEY = "89f20445788ab5ad5af51b3231833937"; // my API key, will hide it in "real" production apps. No reasonable way to make it hidden and work for 3rd party users at the same time
 const artist = "Led%20Zeppelin"; //for simplicity
 const limit = 30;
 const url = `http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${artist}&api_key=${APIKEY}&format=json&limit=${limit}`;
 
-// Fetch albums from API
 export function fetchAlbums() {
   return fetch(url)
     .then((response) => {

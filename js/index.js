@@ -21,7 +21,6 @@ function handleFormChange() {
       ).id;
       data.additionalItems.push(itemName);
     } else {
-      // For other keys, just assign the value
       data[key] = value;
     }
   });
@@ -32,7 +31,7 @@ function handleFormChange() {
 
 export function displayAlbums(albums) {
   const displayAlbums = document.getElementById("display-albums");
-  displayAlbums.innerHTML = ""; // clear the grid from previous searches etc
+  displayAlbums.innerHTML = ""; // clear the grid from previous searches
   albums.forEach((album) => {
     const albumDiv = document.createElement("div");
     albumDiv.className =
@@ -50,7 +49,7 @@ export function displayAlbums(albums) {
       </div>
     `;
     const card = albumDiv.querySelector(".card");
-    displayAlbums.appendChild(albumDiv); // append albumDiv to the grid
+    displayAlbums.appendChild(albumDiv);
     card.addEventListener("click", () => handleCardClick(album.name));
   });
 }
