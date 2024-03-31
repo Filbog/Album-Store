@@ -5,23 +5,15 @@ import { additionalItems, setAdditionalItems } from "./additionalItems.js";
 import { displaySummary } from "./summary.js";
 import { updateTotalPrice, BASE_PRICE } from "./updateTotalPrice.js";
 
-// const body = document.querySelector("body");
-
-// Function to handle form changes
 function handleFormChange() {
-  // Get the form
   const form = document.getElementById("purchaseForm");
-  // get album name and add it to the data object
   let albumName = document.getElementById("albumName").textContent;
 
-  // Get the form data
   const formData = new FormData(form);
 
-  // Create an object to hold the form data
   const data = loadFromLocalStorage(albumName);
-  data.additionalItems = []; //clearing the array
+  data.additionalItems = [];
   formData.forEach(function (value, key) {
-    // Handle additional items separately
     if (key === "additionalItems") {
       // Get the item name from the checked checkbox (FormData only notices checked checkboxes...)
       let itemName = form.querySelector(
@@ -33,20 +25,15 @@ function handleFormChange() {
       data[key] = value;
     }
   });
-  data["totalPrice"] = updateTotalPrice(); //add total price
+  data.totalPrice = updateTotalPrice();
 
-  // Save the form data to localStorage
   saveToLocalStorage(albumName, data);
 }
 
-// Display albums on the page
 export function displayAlbums(albums) {
-  console.log("displaying albums...");
-  console.log(albums);
   const displayAlbums = document.getElementById("display-albums");
-  displayAlbums.innerHTML = ""; // clear the div from previous searches etc
+  displayAlbums.innerHTML = ""; // clear the grid from previous searches etc
   albums.forEach((album) => {
-    //display albums in a responsive grid
     const albumDiv = document.createElement("div");
     albumDiv.className =
       "col-12 col-md-6 col-lg-4 col-xl-3 d-flex justify-content-center";
@@ -69,20 +56,17 @@ export function displayAlbums(albums) {
 }
 
 function handleCardClick(albumName) {
-  console.log(albumName);
-
   const form = document.getElementById("purchaseForm");
-  form.reset(); // Clear the form from different albums
+  console.log(form.elements);
+  console.log(typeof form.elements);
+  form.reset(); // Clear the form from previous albums
   document.getElementById("albumName").textContent = `${albumName}`;
 
   let data = loadFromLocalStorage(albumName);
-  console.log(data);
   let purchaseBtn = document.getElementById("purchaseBtn");
   purchaseBtn.textContent = "Purchase";
   if (data) {
-    console.log(data);
     Object.entries(data).forEach(([key, value]) => {
-      // Change text in submit btn whether the album was bought or not
       if (key === "bought") {
         if (value === true) {
           purchaseBtn.textContent = "Save changes";
@@ -91,8 +75,7 @@ function handleCardClick(albumName) {
       }
       let htmlInput;
       if (key === "payment") {
-        if (value != "") {
-          console.log("KEY", key, "VALUE", value);
+        if (value !== "") {
           htmlInput = document.querySelector(`input[value="${value}"]`);
           htmlInput.checked = true;
         } else {
@@ -100,12 +83,10 @@ function handleCardClick(albumName) {
         }
       } else {
         htmlInput = document.getElementById(`${key}`);
-        console.log("KEY", key);
         htmlInput.value = value;
       }
       // If the key is 'additionalItems', handle it separately
       if (key === "additionalItems") {
-        // Loop through the array and check the checkboxes
         value.forEach((item) => {
           let checkbox = document.getElementById(item);
           if (checkbox) {
@@ -127,7 +108,6 @@ function handleCardClick(albumName) {
       shipmentDate: "",
       totalPrice: BASE_PRICE,
     };
-    // Save the default data to localStorage
     saveToLocalStorage(albumName, data);
   }
   updateTotalPrice();
@@ -137,15 +117,11 @@ function handleCardClick(albumName) {
   });
 }
 
-// Handle form submission
 function handleFormSubmission() {
-  // Handle the form changes
   handleFormChange();
 
-  // Get album name
   let albumName = document.getElementById("albumName").textContent;
 
-  // Load data from localStorage
   let data = loadFromLocalStorage(albumName);
 
   data["bought"] = true;
@@ -154,8 +130,6 @@ function handleFormSubmission() {
 
   const hiddenModalToggler = document.getElementById("hiddenModalToggler");
   hiddenModalToggler.click();
-  // Log the form data
-  console.log(data);
 }
 
 // Initialize all functionality when the document is ready
@@ -163,13 +137,10 @@ document.addEventListener("DOMContentLoaded", function () {
   fetchAlbums().then((albums) => {
     displayAlbums(albums);
     setAdditionalItems(additionalItems);
-    // getPurchased(albums);
     const searchForm = document.getElementById("searchForm");
     searchForm.addEventListener("input", search(albums));
 
-    // Get the form
     const form = document.getElementById("purchaseForm");
-    // Add an event listener for the form submission
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       handleFormSubmission();
@@ -184,8 +155,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-const purchases = document.getElementById("purchases");
 function getPurchased(albums) {
+  const purchases = document.getElementById("purchases");
   let alertPlaceholder = document.getElementById("alertPlaceholder");
   const purchasedAlbums = [];
   purchases.innerHTML = "";
@@ -194,35 +165,28 @@ function getPurchased(albums) {
     if (albumLS !== null) {
       if (albumLS.bought === true) {
         purchasedAlbums.push(albumLS.albumName);
-        // Create a new div element
         let orderedAlbumDiv = document.createElement("div");
         orderedAlbumDiv.classList = "mx-auto mb-3";
 
-        // Create the h5 element
         let h5 = document.createElement("h5");
         h5.textContent = `${albumLS.albumName} - ${albumLS.totalPrice}$`;
         orderedAlbumDiv.appendChild(h5);
 
-        // Create the edit button
         let editBtn = document.createElement("button");
         editBtn.className = "btn btn-primary";
         editBtn.textContent = "Edit";
         editBtn.setAttribute("data-bs-toggle", "modal");
         editBtn.setAttribute("data-bs-target", "#purchaseModal");
         editBtn.addEventListener("click", function () {
-          // Retrieve the data from localStorage
           handleCardClick(albumLS.albumName);
-          // Do something with the data...
         });
         orderedAlbumDiv.appendChild(editBtn);
 
-        // Create the cancel button
         let cancelBtn = document.createElement("button");
         cancelBtn.className = "btn btn-danger cancelOrderBtn";
         cancelBtn.textContent = "Cancel";
         cancelBtn.setAttribute("data-bs-dismiss", "modal");
         cancelBtn.addEventListener("click", function () {
-          // Delete the album from localStorage
           localStorage.removeItem(albumLS.albumName);
           alertPlaceholder.innerHTML = `
             <div class="alert alert-danger alert-dismissible fade show" role="alert" id="deleteAlert">
@@ -232,11 +196,8 @@ function getPurchased(albums) {
         });
         orderedAlbumDiv.appendChild(cancelBtn);
 
-        // Append the div to purchases
         purchases.appendChild(orderedAlbumDiv);
       }
     }
   });
 }
-
-// cancelBtn.addEventListener("click", function () {});

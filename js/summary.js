@@ -11,6 +11,7 @@ export function displaySummary(data) {
     summary.innerText = data[key];
     if (key === "additionalItems") {
       summary.innerText = summaryAdditionalItems(data["additionalItems"]);
+      //hi
     }
   }
 }

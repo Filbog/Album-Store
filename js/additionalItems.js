@@ -21,14 +21,10 @@ export const additionalItems = [
   },
 ];
 
-// Set up additional items
 export function setAdditionalItems(items) {
-  // Get the additional items div
   const additionalItemsDiv = document.getElementById("additionalItems");
 
-  // Loop through the items
   items.forEach(function (item) {
-    // Create a div for the item
     const itemDiv = document.createElement("div");
     itemDiv.className = "form-check mb-3";
     itemDiv.innerHTML = `
@@ -36,7 +32,6 @@ export function setAdditionalItems(items) {
       <label class="form-check-label" for="${item.id}">${item.description} (+${item.price}$)</label>
       `;
 
-    // Add the item div to the additional items div
     additionalItemsDiv.appendChild(itemDiv);
   });
 }
